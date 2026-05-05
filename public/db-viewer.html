@@ -1,0 +1,1548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parking System Database Viewer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .nav {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .nav-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .add-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-warning { background: #ffc107; color: black; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-info { background: #17a2b8; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f8f9fa;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #333;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .table-actions .btn {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #007bff;
+            display: inline-block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .stat-card h3 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            opacity: 0.9;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .data-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+        }
+
+        .data-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .data-table tr:hover {
+            background: #e3f2fd;
+            transition: background 0.3s ease;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .status-active { background: #d4edda; color: #155724; }
+        .status-inactive { background: #f8d7da; color: #721c24; }
+        .status-admin { background: #fff3cd; color: #856404; }
+        .status-user { background: #d1ecf1; color: #0c5460; }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #f5c6cb;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #c3e6cb;
+        }
+
+        .code {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            border: 1px solid #e9ecef;
+            margin: 10px 0;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #333;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        .schema-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .schema-table th,
+        .schema-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .schema-table th {
+            background: #007bff;
+            color: white;
+            font-weight: 600;
+        }
+
+        .schema-table .type {
+            font-family: 'Courier New', monospace;
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .required {
+            color: #dc3545;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚗 Parking System Database</h1>
+            <p>View and manage your MongoDB collections</p>
+        </div>
+
+        <div class="nav">
+            <div class="nav-section">
+                <div class="nav-buttons">
+                    <button class="btn btn-primary" onclick="showSection('overview')">Overview</button>
+                    <button class="btn btn-success" onclick="showSection('users')">Users</button>
+                    <button class="btn btn-info" onclick="showSection('parking')">Parking</button>
+                    <button class="btn btn-warning" onclick="showSection('bookings')">Bookings</button>
+                    <button class="btn btn-danger" onclick="loadAllData()">Refresh All</button>
+                </div>
+                <div class="add-buttons">
+                    <button class="btn btn-success" onclick="openAddModal('parking')" title="Add new parking location">
+                        ➕ Parking
+                    </button>
+                    <button class="btn btn-info" onclick="openAddModal('user')" title="Add new user">
+                        ➕ User
+                    </button>
+                    <button class="btn btn-warning" onclick="openAddModal('booking')" title="Create new booking">
+                        ➕ Booking
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Overview Section -->
+            <div id="overview" class="section active">
+                <h2>📊 Database Overview</h2>
+                <div id="stats-container">
+                    <div class="loading">Loading database statistics...</div>
+                </div>
+                <div class="code">
+                    <strong>API Endpoints:</strong><br>
+                    GET /api/parking - View all parking locations<br>
+                    GET /api/booking - View user bookings (requires auth)<br>
+                    POST /api/auth/login - Get authentication token
+                </div>
+            </div>
+
+            <!-- Users Section -->
+            <div id="users" class="section">
+                <h2>👥 Users Collection</h2>
+                <div id="users-container">
+                    <div class="loading">Loading users...</div>
+                </div>
+            </div>
+
+            <!-- Parking Section -->
+            <div id="parking" class="section">
+                <h2>🏗️ Parking Collection</h2>
+                <div id="parking-container">
+                    <div class="loading">Loading parking locations...</div>
+                </div>
+            </div>
+
+            <!-- Bookings Section -->
+            <div id="bookings" class="section">
+                <h2>🎫 Bookings Collection</h2>
+                <div id="bookings-container">
+                    <div class="loading">Loading bookings...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modals -->
+        <!-- Add Parking Modal -->
+        <div id="addParkingModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>🏗️ Add New Parking Location</h3>
+                    <span class="close" onclick="closeModal('addParkingModal')">&times;</span>
+                </div>
+                <form id="addParkingForm">
+                    <div class="form-group">
+                        <label for="parkingLocation">Location Name:</label>
+                        <input type="text" id="parkingLocation" required placeholder="e.g., Central Mall Parking">
+                    </div>
+                    <div class="form-group">
+                        <label for="parkingSlots">Total Slots:</label>
+                        <input type="number" id="parkingSlots" required min="1" placeholder="e.g., 100">
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('addParkingModal')">Cancel</button>
+                        <button type="submit" class="btn btn-success">Add Parking</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add User Modal -->
+        <div id="addUserModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>👤 Add New User</h3>
+                    <span class="close" onclick="closeModal('addUserModal')">&times;</span>
+                </div>
+                <form id="addUserForm">
+                    <div class="form-group">
+                        <label for="userName">Full Name:</label>
+                        <input type="text" id="userName" required placeholder="e.g., John Doe">
+                    </div>
+                    <div class="form-group">
+                        <label for="userEmail">Email:</label>
+                        <input type="email" id="userEmail" required placeholder="e.g., john@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="userPassword">Password:</label>
+                        <input type="password" id="userPassword" required placeholder="Minimum 6 characters">
+                    </div>
+                    <div class="form-group">
+                        <label for="userRole">Role:</label>
+                        <select id="userRole" required>
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('addUserModal')">Cancel</button>
+                        <button type="submit" class="btn btn-success">Add User</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add Booking Modal -->
+        <div id="addBookingModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>🎫 Create New Booking</h3>
+                    <span class="close" onclick="closeModal('addBookingModal')">&times;</span>
+                </div>
+                <form id="addBookingForm">
+                    <div class="form-group">
+                        <label for="bookingParkingId">Parking Location:</label>
+                        <select id="bookingParkingId" required>
+                            <option value="">Select parking location...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="bookingStartTime">Start Time:</label>
+                        <input type="datetime-local" id="bookingStartTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bookingEndTime">End Time:</label>
+                        <input type="datetime-local" id="bookingEndTime" required>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('addBookingModal')">Cancel</button>
+                        <button type="submit" class="btn btn-success">Create Booking</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Edit Parking Modal -->
+        <div id="editParkingModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>✏️ Edit Parking Location</h3>
+                    <span class="close" onclick="closeModal('editParkingModal')">&times;</span>
+                </div>
+                <form id="editParkingForm">
+                    <input type="hidden" id="editParkingId">
+                    <div class="form-group">
+                        <label for="editParkingLocation">Location Name:</label>
+                        <input type="text" id="editParkingLocation" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editParkingSlots">Total Slots:</label>
+                        <input type="number" id="editParkingSlots" required min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="editAvailableSlots">Available Slots:</label>
+                        <input type="number" id="editAvailableSlots" required min="0">
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('editParkingModal')">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Parking</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <script>
+        let authToken = localStorage.getItem('parking_token');
+
+        // Navigation
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+
+            // Load data for the section
+            switch(sectionId) {
+                case 'overview':
+                    loadStats();
+                    break;
+                case 'users':
+                    loadUsers();
+                    break;
+                case 'parking':
+                    loadParking();
+                    break;
+                case 'bookings':
+                    loadBookings();
+                    break;
+            }
+        }
+
+        // Load all data
+        function loadAllData() {
+            loadStats();
+            loadUsers();
+            loadParking();
+            loadBookings();
+        }
+
+        // Modal functions
+        function openAddModal(type) {
+            if (type === 'parking') {
+                document.getElementById('addParkingModal').style.display = 'block';
+            } else if (type === 'user') {
+                document.getElementById('addUserModal').style.display = 'block';
+            } else if (type === 'booking') {
+                if (!authToken) {
+                    alert('Please login first to create bookings!');
+                    window.open('/api-docs', '_blank');
+                    return;
+                }
+                loadParkingOptions();
+                document.getElementById('addBookingModal').style.display = 'block';
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function openEditModal(parkingId, location, totalSlots, availableSlots) {
+            document.getElementById('editParkingId').value = parkingId;
+            document.getElementById('editParkingLocation').value = location;
+            document.getElementById('editParkingSlots').value = totalSlots;
+            document.getElementById('editAvailableSlots').value = availableSlots;
+            document.getElementById('editParkingModal').style.display = 'block';
+        }
+
+        // Load parking options for booking
+        async function loadParkingOptions() {
+            try {
+                const response = await fetch('/api/parking');
+                const data = await response.json();
+
+                const select = document.getElementById('bookingParkingId');
+                select.innerHTML = '<option value="">Select parking location...</option>';
+
+                if (data.success) {
+                    data.data.forEach(parking => {
+                        const option = document.createElement('option');
+                        option.value = parking._id;
+                        option.textContent = `${parking.location} (${parking.availableSlots}/${parking.totalSlots} available)`;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading parking options:', error);
+            }
+        }
+
+        // Form handlers
+        document.getElementById('addParkingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const location = document.getElementById('parkingLocation').value;
+            const totalSlots = document.getElementById('parkingSlots').value;
+
+            try {
+                const response = await fetch('/api/parking', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        location: location,
+                        totalSlots: parseInt(totalSlots)
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Parking location added successfully!');
+                    closeModal('addParkingModal');
+                    document.getElementById('addParkingForm').reset();
+                    loadParking();
+                    loadStats();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                alert('Error adding parking location: ' + error.message);
+            }
+        });
+
+        document.getElementById('addUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('userName').value;
+            const email = document.getElementById('userEmail').value;
+            const password = document.getElementById('userPassword').value;
+            const role = document.getElementById('userRole').value;
+
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        email: email,
+                        password: password,
+                        confirmPassword: password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('User created successfully!');
+                    closeModal('addUserModal');
+                    document.getElementById('addUserForm').reset();
+                    loadUsers();
+                    loadStats();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                alert('Error creating user: ' + error.message);
+            }
+        });
+
+        document.getElementById('addBookingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!authToken) {
+                alert('Please login first!');
+                return;
+            }
+
+            const parkingId = document.getElementById('bookingParkingId').value;
+            const startTime = document.getElementById('bookingStartTime').value;
+            const endTime = document.getElementById('bookingEndTime').value;
+
+            try {
+                const response = await fetch('/api/booking', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        parkingId: parkingId,
+                        startTime: startTime,
+                        endTime: endTime
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Booking created successfully!');
+                    closeModal('addBookingModal');
+                    document.getElementById('addBookingForm').reset();
+                    loadBookings();
+                    loadParking();
+                    loadStats();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                alert('Error creating booking: ' + error.message);
+            }
+        });
+
+        document.getElementById('editParkingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const id = document.getElementById('editParkingId').value;
+            const availableSlots = document.getElementById('editAvailableSlots').value;
+
+            try {
+                const response = await fetch(`/api/admin/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        availableSlots: parseInt(availableSlots)
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Parking updated successfully!');
+                    closeModal('editParkingModal');
+                    loadParking();
+                    loadStats();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                alert('Error updating parking: ' + error.message);
+            }
+        });
+
+        // Delete functions
+        async function deleteParking(id, location) {
+            if (confirm(`Are you sure you want to delete "${location}"? This action cannot be undone.`)) {
+                // Note: This would require adding a DELETE endpoint to the API
+                alert('Delete functionality would require adding a DELETE /api/admin/:id endpoint to the backend.');
+            }
+        }
+
+        async function deleteUser(id, name) {
+            if (confirm(`Are you sure you want to delete user "${name}"? This action cannot be undone.`)) {
+                // Note: This would require adding a DELETE endpoint for users
+                alert('Delete functionality would require adding a DELETE /api/admin/users/:id endpoint to the backend.');
+            }
+        }
+
+        // Load database statistics
+        async function loadStats() {
+            const container = document.getElementById('stats-container');
+            container.innerHTML = '<div class="loading">Loading database statistics...</div>';
+
+            try {
+                // Load parking data to get counts
+                const parkingResponse = await fetch('http://localhost:3000/api/parking');
+                const parkingData = await parkingResponse.json();
+
+                let parkingCount = 0;
+                let userCount = 0;
+                let bookingCount = 0;
+
+                if (parkingData.success) {
+                    parkingCount = parkingData.data.length;
+                }
+
+                try {
+                    const userResponse = await fetch('/api/auth/users');
+                    const userData = await userResponse.json();
+                    if (userData.success) {
+                        userCount = userData.data.length;
+                    }
+                } catch (e) {
+                    userCount = 0;
+                }
+
+                // Try to load bookings if authenticated
+                if (authToken) {
+                    try {
+                        const bookingResponse = await fetch('http://localhost:3000/api/booking', {
+                            headers: {
+                                'Authorization': `Bearer ${authToken}`
+                            }
+                        });
+                        const bookingData = await bookingResponse.json();
+                        if (bookingData.success) {
+                            bookingCount = bookingData.data.length;
+                        }
+                    } catch (e) {
+                        // Ignore booking count if not authenticated
+                    }
+                }
+
+                container.innerHTML = `
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>${userCount}</h3>
+                            <p>👥 Total Users</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>${parkingCount}</h3>
+                            <p>🏗️ Parking Locations</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>${bookingCount}</h3>
+                            <p>🎫 Active Bookings</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>MongoDB</h3>
+                            <p>💾 Database Type</p>
+                        </div>
+                    </div>
+                    <div class="success">
+                        ✅ Database connected successfully! Collections are automatically created when data is saved.
+                        <br><br>
+                        <strong>Add Data:</strong> Use the ➕ buttons above to add new records
+                        <br>
+                        <strong>Edit Data:</strong> Click ✏️ buttons in tables to modify records
+                        <br>
+                        <strong>Delete Data:</strong> Click 🗑️ buttons (requires backend implementation)
+                        <br>
+                        <strong>Cancel Bookings:</strong> Click ❌ buttons to cancel active bookings
+                    </div>
+                `;
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="error">
+                        ❌ Cannot connect to API. Make sure the server is running on port 3000.
+                        <br><br>
+                        <strong>Start the server:</strong><br>
+                        <code>cd parking-system && npm start</code>
+                    </div>
+                `;
+            }
+        }
+
+        // Load users data
+        async function loadUsers() {
+            const container = document.getElementById('users-container');
+            container.innerHTML = '<div class="loading">Loading users...</div>';
+
+            try {
+                const response = await fetch('/api/auth/users');
+                const data = await response.json();
+
+                if (!data.success) {
+                    container.innerHTML = '<div class="error">Failed to load users data</div>';
+                    return;
+                }
+
+                if (data.data.length === 0) {
+                    container.innerHTML = `
+                        <div class="success">
+                            📝 No users found in the database.
+                        </div>
+                    `;
+                    return;
+                }
+
+                let tableHTML = `
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                data.data.forEach(user => {
+                    const roleClass = user.role === 'admin' ? 'status-admin' : 'status-user';
+                    const canDelete = user.role !== 'admin';
+                    tableHTML += `
+                        <tr>
+                            <td>${user.name}</td>
+                            <td>${user.email}</td>
+                            <td><span class="status-badge ${roleClass}">${user.role}</span></td>
+                            <td><span class="status-badge status-active">Active</span></td>
+                            <td class="table-actions">
+                                <button class="btn btn-danger" ${canDelete ? '' : 'disabled'} onclick="deleteUser('${user._id}', '${user.name}')" title="Delete user">🗑️</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                tableHTML += `
+                        </tbody>
+                    </table>
+                    <div class="code">
+                        <strong>Notes:</strong><br>
+                        • Newly registered users will appear after refresh.<br>
+                        • Admin users cannot be deleted from this viewer yet.
+                    </div>
+                `;
+
+                container.innerHTML = tableHTML;
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="error">
+                        Cannot load users. Make sure the server is running.
+                    </div>
+                `;
+            }
+        }
+
+        // Load parking data
+        async function loadParking() {
+            const container = document.getElementById('parking-container');
+            container.innerHTML = '<div class="loading">Loading parking locations...</div>';
+
+            try {
+                const response = await fetch('http://localhost:3000/api/parking');
+                const data = await response.json();
+
+                if (data.success) {
+                    let tableHTML = `
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Location</th>
+                                    <th>Available Slots</th>
+                                    <th>Total Slots</th>
+                                    <th>Occupancy</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+
+                    data.data.forEach(parking => {
+                        const occupancyPercent = ((parking.totalSlots - parking.availableSlots) / parking.totalSlots * 100).toFixed(1);
+                        const occupancyColor = occupancyPercent > 80 ? 'status-inactive' : 'status-active';
+
+                        tableHTML += `
+                            <tr>
+                                <td>${parking.location}</td>
+                                <td>${parking.availableSlots}</td>
+                                <td>${parking.totalSlots}</td>
+                                <td><span class="status-badge ${occupancyColor}">${occupancyPercent}%</span></td>
+                                <td class="table-actions">
+                                    <button class="btn btn-info" onclick="copyToClipboard('${parking._id}')" title="Copy ID">📋</button>
+                                    <button class="btn btn-warning" onclick="openEditModal('${parking._id}', '${parking.location}', ${parking.totalSlots}, ${parking.availableSlots})" title="Edit">✏️</button>
+                                    <button class="btn btn-danger" onclick="deleteParking('${parking._id}', '${parking.location}')" title="Delete">🗑️</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    tableHTML += `
+                            </tbody>
+                        </table>
+                        <div class="code">
+                            <strong>Use these IDs for booking:</strong><br>
+                            Copy any Parking ID above to use in booking API calls
+                        </div>
+                    `;
+
+                    container.innerHTML = tableHTML;
+                } else {
+                    container.innerHTML = '<div class="error">Failed to load parking data</div>';
+                }
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="error">
+                        Cannot load parking data. Make sure the server is running.
+                    </div>
+                `;
+            }
+        }
+
+        // Load bookings data
+        async function loadBookings() {
+            const container = document.getElementById('bookings-container');
+            container.innerHTML = '<div class="loading">Loading bookings...</div>';
+
+            if (!authToken) {
+                container.innerHTML = `
+                    <div class="error">
+                        🔐 Authentication required to view bookings.
+                        <br><br>
+                        <strong>To view bookings:</strong><br>
+                        1. Go to <a href="http://localhost:3000/api-docs" target="_blank">Swagger UI</a><br>
+                        2. Login with user@parking.com / user123<br>
+                        3. Copy the token and authorize<br>
+                        4. Make some bookings first
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:3000/api/booking', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    if (data.data.length === 0) {
+                        container.innerHTML = `
+                            <div class="success">
+                                📝 No bookings found. Create some bookings first using the API!
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    let tableHTML = `
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Parking Location</th>
+                                    <th>Start Time</th>
+                                    <th>End Time</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+
+                    data.data.forEach(booking => {
+                        const statusClass = booking.status === 'active' ? 'status-active' : 'status-inactive';
+                        const startTime = new Date(booking.startTime).toLocaleString();
+                        const endTime = new Date(booking.endTime).toLocaleString();
+
+                        tableHTML += `
+                            <tr>
+                                <td>${booking.user?.name || 'Unknown'}</td>
+                                <td>${booking.parking?.location || 'Unknown'}</td>
+                                <td>${startTime}</td>
+                                <td>${endTime}</td>
+                                <td><span class="status-badge ${statusClass}">${booking.status}</span></td>
+                                <td class="table-actions">
+                                    <button class="btn btn-danger" onclick="cancelBooking('${booking._id}')" title="Cancel booking">❌</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    tableHTML += `
+                            </tbody>
+                        </table>
+                    `;
+
+                    container.innerHTML = tableHTML;
+                } else {
+                    container.innerHTML = '<div class="error">Failed to load bookings data</div>';
+                }
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="error">
+                        Cannot load bookings. Token might be expired.
+                        <br><br>
+                        <a href="http://localhost:3000/api-docs" target="_blank" class="btn btn-primary">Go to Swagger to Re-authenticate</a>
+                    </div>
+                `;
+            }
+        }
+
+        // Copy to clipboard function
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('ID copied to clipboard: ' + text);
+            });
+        }
+
+        // Cancel booking function
+        async function cancelBooking(bookingId) {
+            if (!authToken) {
+                alert('Authentication required');
+                return;
+            }
+
+            if (confirm('Are you sure you want to cancel this booking?')) {
+                try {
+                    const response = await fetch(`http://localhost:3000/api/booking/${bookingId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`
+                        }
+                    });
+
+                    if (response.ok) {
+                        alert('Booking cancelled successfully!');
+                        loadBookings(); // Refresh the bookings list
+                        loadStats(); // Refresh stats
+                    } else {
+                        alert('Failed to cancel booking');
+                    }
+                } catch (error) {
+                    alert('Error cancelling booking');
+                }
+            }
+        }
+
+        // Load initial data
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStats();
+        });
+
+        // Auto-refresh every 30 seconds
+        setInterval(loadAllData, 30000);
+
+        // Copy to clipboard function
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                alert('ID copied to clipboard: ' + text);
+            }, function(err) {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('ID copied to clipboard: ' + text);
+            });
+        }
+
+        // Modal functions
+        function openAddModal(type) {
+            if (type === 'booking' && !authToken) {
+                alert('You must be logged in to create bookings. Please use Swagger UI to login first.');
+                window.open('http://localhost:3000/api-docs', '_blank');
+                return;
+            }
+
+            if (type === 'user' && !isAdmin()) {
+                alert('Only admin users can add new users.');
+                return;
+            }
+
+            const modalId = `add${type.charAt(0).toUpperCase() + type.slice(1)}Modal`;
+            document.getElementById(modalId).style.display = 'block';
+
+            if (type === 'booking') {
+                loadParkingOptions();
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function isAdmin() {
+            // Check if user is admin (this is a simple check, in production you'd decode the JWT)
+            return authToken && authToken.includes('admin');
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.className === 'modal') {
+                event.target.style.display = 'none';
+            }
+        }
+
+        // Load parking options for booking dropdown
+        async function loadParkingOptions() {
+            try {
+                const response = await fetch('http://localhost:3000/api/parking');
+                const data = await response.json();
+
+                const select = document.getElementById('bookingParkingId');
+                select.innerHTML = '<option value="">Select parking location...</option>';
+
+                if (data.success) {
+                    data.data.forEach(parking => {
+                        const option = document.createElement('option');
+                        option.value = parking._id;
+                        option.textContent = `${parking.location} (${parking.availableSlots}/${parking.totalSlots} available)`;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading parking options:', error);
+            }
+        }
+
+        // Edit parking function
+        function editParking(id, location, totalSlots, availableSlots) {
+            document.getElementById('editParkingId').value = id;
+            document.getElementById('editParkingLocation').value = location;
+            document.getElementById('editParkingSlots').value = totalSlots;
+            document.getElementById('editAvailableSlots').value = availableSlots;
+            document.getElementById('editParkingModal').style.display = 'block';
+        }
+
+        // Delete parking function
+        async function deleteParking(id, location) {
+            if (!isAdmin()) {
+                alert('Only admin users can delete parking locations.');
+                return;
+            }
+
+            if (confirm(`Are you sure you want to delete "${location}"? This action cannot be undone.`)) {
+                try {
+                    const response = await fetch(`http://localhost:3000/api/admin/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': authToken ? `Bearer ${authToken}` : ''
+                        }
+                    });
+
+                    if (response.ok) {
+                        alert('Parking location deleted successfully!');
+                        loadParking();
+                        loadStats();
+                    } else {
+                        const data = await response.json();
+                        alert('Error: ' + (data.message || 'Failed to delete parking location'));
+                    }
+                } catch (error) {
+                    alert('Error deleting parking location');
+                }
+            }
+        }
+
+        // Delete user function
+        function deleteUser(email, name) {
+            if (!isAdmin()) {
+                alert('Only admin users can delete users.');
+                return;
+            }
+
+            if (confirm(`Are you sure you want to delete user "${name}" (${email})? This action cannot be undone.`)) {
+                alert('Note: User deletion is not implemented in the current API. This would require an admin endpoint.');
+                // In a real implementation, you'd make an API call here
+                // loadUsers(); // Refresh the table
+            }
+        }
+
+        // Cancel booking function
+        async function cancelBooking(id) {
+            if (!authToken) {
+                alert('Authentication required');
+                return;
+            }
+
+            if (confirm('Are you sure you want to cancel this booking?')) {
+                try {
+                    const response = await fetch(`http://localhost:3000/api/booking/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`
+                        }
+                    });
+
+                    if (response.ok) {
+                        alert('Booking cancelled successfully!');
+                        loadBookings();
+                        loadParking(); // Refresh availability
+                        loadStats();
+                    } else {
+                        const data = await response.json();
+                        alert('Error: ' + (data.message || 'Failed to cancel booking'));
+                    }
+                } catch (error) {
+                    alert('Error cancelling booking');
+                }
+            }
+        }
+
+        // Form submission handlers
+        document.getElementById('addParkingForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const location = document.getElementById('parkingLocation').value;
+            const totalSlots = parseInt(document.getElementById('parkingSlots').value);
+
+            try {
+                const response = await fetch('http://localhost:3000/api/parking', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': authToken ? `Bearer ${authToken}` : ''
+                    },
+                    body: JSON.stringify({
+                        location,
+                        totalSlots
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Parking location added successfully!');
+                    closeModal('addParkingModal');
+                    this.reset();
+                    loadParking();
+                    loadStats();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                alert('Error adding parking location');
+            }
+        });
+
+        document.getElementById('addUserForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            if (!isAdmin()) {
+                alert('Only admin users can add users');
+                return;
+            }
+
+            const name = document.getElementById('userName').value;
+            const email = document.getElementById('userEmail').value;
+            const password = document.getElementById('userPassword').value;
+            const role = document.getElementById('userRole').value;
+
+            try {
+                const response = await fetch('http://localhost:3000/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name,
+                        email,
+                        password,
+                        confirmPassword: password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('User added successfully!');
+                    closeModal('addUserModal');
+                    this.reset();
+                    loadUsers();
+                    loadStats();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                alert('Error adding user');
+            }
+        });
+
+        document.getElementById('addBookingForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            if (!authToken) {
+                alert('Authentication required');
+                return;
+            }
+
+            const parkingId = document.getElementById('bookingParkingId').value;
+            const startTime = document.getElementById('bookingStartTime').value;
+            const endTime = document.getElementById('bookingEndTime').value;
+
+            try {
+                const response = await fetch('http://localhost:3000/api/booking', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        parkingId,
+                        startTime: new Date(startTime).toISOString(),
+                        endTime: new Date(endTime).toISOString()
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Booking created successfully!');
+                    closeModal('addBookingModal');
+                    this.reset();
+                    loadBookings();
+                    loadParking(); // Refresh parking availability
+                    loadStats();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                alert('Error creating booking');
+            }
+        });
+
+        document.getElementById('editParkingForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('editParkingId').value;
+            const location = document.getElementById('editParkingLocation').value;
+            const totalSlots = parseInt(document.getElementById('editParkingSlots').value);
+            const availableSlots = parseInt(document.getElementById('editAvailableSlots').value);
+
+            if (availableSlots > totalSlots) {
+                alert('Available slots cannot exceed total slots');
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:3000/api/admin/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': authToken ? `Bearer ${authToken}` : ''
+                    },
+                    body: JSON.stringify({
+                        availableSlots
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Parking location updated successfully!');
+                    closeModal('editParkingModal');
+                    loadParking();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                alert('Error updating parking location');
+            }
+        });
+    </script>
+    </script>
+</body>
+</html>
