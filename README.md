@@ -107,3 +107,9 @@ http://localhost:3000/db-viewer.html
 - Protected routes require `Bearer <token>` authorization.
 - The viewer page fetches live data from the API.
 - `POST /api/auth/register` and `POST /api/auth/login` are public routes.
+
+
+## Team Contributions
+
+- Himanshu Dhaka: Worked on the booking page functionality and related user interface flow for the parking system.
+- Note: Initially, the team shared code locally. Later, GitHub was adopted for proper version control and collaboration from Sprint 2 onwards.
