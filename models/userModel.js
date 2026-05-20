@@ -1,3 +1,5 @@
+//Auth page handled by Surya Initially, our team shared code locally instead of using GitHub. Later, we realised proper version control was needed, so Nikhil helped set up the GitHub environment and guided the team with Git workflows. From Sprint 2 onwards, the team started using GitHub regularly for collaboration and code management.
+
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(

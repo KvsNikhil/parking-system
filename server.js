@@ -1,6 +1,7 @@
 require("dotenv").config();
 
 const express = require("express");
+const cors = require("cors");
 const app = express();
 
 const connectDB = require("./config/db");
@@ -8,6 +9,7 @@ const errorHandler = require("./middleware/errorMiddleware");
 
 connectDB();
 
+app.use(cors({ origin: "http://localhost:5173" }));
 app.use(express.json());
 
 // Serve static files from public directory
