@@ -9,7 +9,8 @@ const errorHandler = require("./middleware/errorMiddleware");
 
 connectDB();
 
-app.use(cors({ origin: "http://localhost:5173" }));
+const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
+app.use(cors({ origin: CLIENT_URL }));
 app.use(express.json());
 
 // Serve static files from public directory
@@ -36,6 +37,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(errorHandler);
 
 // START SERVER
-app.listen(process.env.PORT, () =>
-  console.log(`Server running on port ${process.env.PORT}`)
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () =>
+  console.log(`Server running on port ${PORT} (client allowed: ${CLIENT_URL})`)
 );
