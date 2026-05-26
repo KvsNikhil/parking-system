@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema(
       match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, "Please provide a valid email"]
     },
     password: { type: String, required: true, minlength: 6, select: false },
+    phone: { type: String, trim: true },
     role: { type: String, enum: ["user", "admin"], default: "user" }
   },
   { timestamps: true }

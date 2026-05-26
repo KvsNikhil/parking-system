@@ -1,5 +1,6 @@
 const router = require("express").Router();
-const { registerUser, loginUser, getAllUsers } = require("../controllers/authController");
+const { registerUser, loginUser, getAllUsers, updateProfile } = require("../controllers/authController");
+const { protect, adminOnly } = require("../middleware/authMiddleware");
 
 /**
  * @swagger
@@ -44,6 +45,7 @@ router.post("/register", registerUser);
  *         description: Invalid credentials
  */
 router.post("/login", loginUser);
-router.get("/users", getAllUsers);
+router.get("/users", protect, adminOnly, getAllUsers);
+router.put("/profile", protect, updateProfile);
 
 module.exports = router;

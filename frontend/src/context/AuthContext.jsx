@@ -1,5 +1,5 @@
 import { createContext, useState } from "react";
-import { login as loginAPI, register as registerAPI } from "../services/authService";
+import { login as loginAPI, register as registerAPI, updateProfile as updateProfileAPI } from "../services/authService";
 
 const AuthContext = createContext(null);
 
@@ -32,6 +32,14 @@ export const AuthProvider = ({ children }) => {
     return response;
   };
 
+  const updateProfile = async (profileData) => {
+    const response = await updateProfileAPI(profileData);
+    const { user: updatedUser } = response.data;
+    localStorage.setItem("parking_user", JSON.stringify(updatedUser));
+    setUser(updatedUser);
+    return response;
+  };
+
   const logout = () => {
     localStorage.removeItem("parking_token");
     localStorage.removeItem("parking_user");
@@ -40,7 +48,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, register, login, logout }}>
+    <AuthContext.Provider value={{ user, token, register, login, logout, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );
