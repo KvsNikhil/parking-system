@@ -112,7 +112,10 @@ function Parkings() {
   const totalAvailable = parkings.reduce((sum, parking) => sum + (parking.availableSlots || 0), 0);
 
   return (
-    <div className="space-y-10 max-w-6xl mx-auto px-4 py-8">
+    <div className="relative space-y-10 max-w-6xl mx-auto px-4 py-8">
+      {/* Subtle background pattern */}
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-blue-50 via-white to-emerald-50 opacity-80" />
+      {/* Section: Admin Banner */}
       {user?.role === "admin" && (
         <div className="rounded-3xl border border-blue-200 bg-gradient-to-r from-blue-50 to-blue-100 p-8 text-blue-900 shadow-lg">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -130,6 +133,7 @@ function Parkings() {
       )}
 
       <div className="grid gap-8 lg:grid-cols-[1.5fr_0.9fr]">
+        <div className="hidden lg:block border-r border-slate-200 absolute left-1/2 top-0 h-full -translate-x-1/2" aria-hidden="true" />
         <section className="space-y-8 rounded-3xl bg-white p-8 shadow-lg border border-slate-100">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between border-b border-slate-100 pb-4">
             <div>
@@ -155,17 +159,38 @@ function Parkings() {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-3">
-            <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-blue-50 to-slate-50 p-6 shadow-sm">
-              <p className="text-sm text-slate-500">Locations</p>
-              <p className="mt-2 text-3xl font-bold text-slate-900">{totalLocations}</p>
+            <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-blue-50 to-slate-50 p-6 shadow-sm flex items-center gap-4">
+              <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-100">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6 text-blue-600">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75A4.5 4.5 0 008 6.75v3.75m8.25 0a2.25 2.25 0 11-4.5 0m4.5 0a2.25 2.25 0 01-4.5 0m0 0V6.75m0 3.75a2.25 2.25 0 11-4.5 0m4.5 0a2.25 2.25 0 01-4.5 0" />
+                </svg>
+              </span>
+              <div>
+                <p className="text-sm text-slate-500">Locations</p>
+                <p className="mt-1 text-3xl font-bold text-slate-900">{totalLocations}</p>
+              </div>
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-green-50 to-slate-50 p-6 shadow-sm">
-              <p className="text-sm text-slate-500">Total slots</p>
-              <p className="mt-2 text-3xl font-bold text-slate-900">{totalSlots}</p>
+            <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-green-50 to-slate-50 p-6 shadow-sm flex items-center gap-4">
+              <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-green-100">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6 text-green-600">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" />
+                </svg>
+              </span>
+              <div>
+                <p className="text-sm text-slate-500">Total slots</p>
+                <p className="mt-1 text-3xl font-bold text-slate-900">{totalSlots}</p>
+              </div>
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-emerald-50 to-slate-50 p-6 shadow-sm">
-              <p className="text-sm text-slate-500">Available now</p>
-              <p className="mt-2 text-3xl font-bold text-slate-900">{totalAvailable}</p>
+            <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-emerald-50 to-slate-50 p-6 shadow-sm flex items-center gap-4">
+              <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-100">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6 text-emerald-600">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </span>
+              <div>
+                <p className="text-sm text-slate-500">Available now</p>
+                <p className="mt-1 text-3xl font-bold text-slate-900">{totalAvailable}</p>
+              </div>
             </div>
           </div>
 
@@ -181,24 +206,42 @@ function Parkings() {
                 No parking locations found yet. Add a new location or search again.
               </div>
             ) : (
-              <div className="grid gap-6 md:grid-cols-2">
-                {parkings.map((parking) => (
-                  <div key={parking._id} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-md transition-transform duration-200 hover:-translate-y-1 hover:shadow-xl flex flex-col justify-between min-h-[200px]">
+              <div className="grid gap-8 md:grid-cols-2">
+                {parkings.map((parking, idx) => (
+                  <div
+                    key={parking._id}
+                    className="group rounded-3xl border border-slate-200 bg-white p-7 shadow-md transition-transform duration-200 hover:-translate-y-1 hover:shadow-2xl flex flex-col justify-between min-h-[220px] relative overflow-hidden"
+                  >
+                    {/* 'New' badge for recently added locations (first 2 as example) */}
+                    {idx < 2 && (
+                      <span className="absolute top-4 right-4 z-10 rounded-full bg-gradient-to-r from-emerald-400 to-green-500 px-3 py-1 text-xs font-bold text-white shadow-md animate-pulse">
+                        New
+                      </span>
+                    )}
                     <div className="flex flex-wrap items-start justify-between gap-4">
                       <div>
-                        <h4 className="text-xl font-bold text-slate-900">{parking.location}</h4>
-                        <p className="mt-2 text-base text-slate-600">Total slots: <span className="font-semibold">{parking.totalSlots}</span></p>
-                        <p className="text-base text-slate-600">Available slots: <span className="font-semibold">{parking.availableSlots}</span></p>
+                        <h4 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                          <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' strokeWidth={2} stroke='currentColor' className='w-6 h-6 text-blue-500'><path strokeLinecap='round' strokeLinejoin='round' d='M16.5 10.5V6.75A4.5 4.5 0 008 6.75v3.75m8.25 0a2.25 2.25 0 11-4.5 0m4.5 0a2.25 2.25 0 01-4.5 0m0 0V6.75m0 3.75a2.25 2.25 0 11-4.5 0m4.5 0a2.25 2.25 0 01-4.5 0' /></svg>
+                          {parking.location}
+                        </h4>
+                        <p className="mt-2 text-base text-slate-600 flex items-center gap-1">
+                          <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' strokeWidth={2} stroke='currentColor' className='w-5 h-5 text-green-500'><path strokeLinecap='round' strokeLinejoin='round' d='M12 6v6l4 2' /></svg>
+                          Total slots: <span className="font-semibold ml-1">{parking.totalSlots}</span>
+                        </p>
+                        <p className="text-base text-slate-600 flex items-center gap-1">
+                          <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' strokeWidth={2} stroke='currentColor' className='w-5 h-5 text-emerald-500'><path strokeLinecap='round' strokeLinejoin='round' d='M5 13l4 4L19 7' /></svg>
+                          Available slots: <span className="font-semibold ml-1">{parking.availableSlots}</span>
+                        </p>
                       </div>
-                      <span className={`inline-flex rounded-full px-4 py-1.5 text-base font-semibold shadow-sm ${parking.availableSlots > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`}>
+                      <span className={`inline-flex rounded-full px-4 py-1.5 text-base font-semibold shadow-sm ${parking.availableSlots > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'} transition-colors duration-200`}>
                         {parking.availableSlots > 0 ? 'Open' : 'Full'}
                       </span>
                     </div>
-                    <div className="mt-6 flex flex-wrap gap-3">
+                    <div className="mt-8 flex flex-wrap gap-3">
                       {user?.role !== "admin" ? (
                         <button
                           onClick={() => handleSelectParking(parking)}
-                          className="rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-6 py-2 text-base font-semibold text-white shadow-md transition hover:from-blue-700 hover:to-blue-600"
+                          className="rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-6 py-2 text-base font-semibold text-white shadow-md transition hover:from-blue-700 hover:to-blue-600 hover:scale-105 group-hover:scale-105"
                         >
                           Book slot
                         </button>
